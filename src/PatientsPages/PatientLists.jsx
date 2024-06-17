@@ -184,6 +184,8 @@ const PatientLists = () => {
             onChange={(e) => setSelectedWard(e.target.value)}
             fullWidth
             variant="outlined"
+
+            
             sx={{ mt: 2, mb: 2 }}
           >
             <MenuItem value={1}>Neurosurgical ward</MenuItem>

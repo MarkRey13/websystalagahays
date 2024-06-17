@@ -1,92 +1,71 @@
 import * as React from 'react';
-import { Container, Grid, Paper, TextField, 
-        InputAdornment, MenuItem, Select, FormControl, InputLabel,
-        Table, TableContainer, TableHead, TableBody, TableRow, TableCell, 
-        Typography, Divider, Box, } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { Container, Grid, Paper, MenuItem, Select, FormControl, InputLabel, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Divider, Box } from '@mui/material';
+import supabase from '../Services/Supabase'; // Assuming this is correctly configured
 
 export default function Wards() {
-  const [wardName, setWardName] = React.useState('');
+  const [wardNumber, setWardNumber] = React.useState('');
+  const [availableBeds, setAvailableBeds] = React.useState(null);
 
-  const handleWardChange = (event) => {
-    setWardName(event.target.value);
+  const handleWardChange = async (event) => {
+    const selectedWard = event.target.value;
+    setWardNumber(selectedWard);
+    fetchAvailableBeds(selectedWard);
+  };
+
+  const fetchAvailableBeds = async (wardNumber) => {
+    try {
+      const { data, error } = await supabase.rpc('GetAvailableBedsByWardNumber', { p_ward_number: wardNumber });
+      if (error) {
+        throw error;
+      }
+      setAvailableBeds(data.getavailablebeds); // Assuming the stored procedure returns a single value for available beds
+    } catch (error) {
+      console.error('Error fetching available beds:', error.message);
+    }
   };
 
   return (
-    <Container display="flex" sx={{ mt: -5, mb: 2 }}>
-      <Grid container spacing={5} justifyContent="flex-start" alignItems="center">
-        <Grid item xs={12}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb:5 }}>
-
+    <Container display="flex" justifyContent="center" alignItems="center" mt={5} mb={5}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} sm={6}>
+          <Paper sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <FormControl variant="outlined" sx={{ minWidth: 200, mr: 2 }}>
-                <InputLabel>Ward Name</InputLabel>
+                <InputLabel>Ward Number</InputLabel>
                 <Select
-                  value={wardName}
+                  value={wardNumber}
                   onChange={handleWardChange}
-                  label="Ward Name"
+                  label="Ward Number"
                 >
                   <MenuItem value="">
                     <em>None</em>
                   </MenuItem>
-                  <MenuItem value="Ward 1">Ward 1</MenuItem>
-                  <MenuItem value="Ward 2">Ward 2</MenuItem>
-                  <MenuItem value="Ward 3">Ward 3</MenuItem>
-                  {/* Add more wards as needed */}
+                  {/* Replace hardcoded values with data from the WARD table */}
+                  {[...Array(18).keys()].map((wardNumber) => (
+                    <MenuItem key={wardNumber + 1} value={wardNumber + 1}>
+                      {wardNumber + 1}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
-
-              <TextField
-                variant="outlined"
-                placeholder="Search"
-                sx={{ borderRadius: 1, ml: 'auto' }} // Move to the right
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                  sx: {
-                    ml: 2, borderRadius: 2, // Adding borderRadius
-                  },
-                }}
-              />
             </Box>
-          <Paper sx={{ p: 10 }}>
-    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-      <Typography component="h6" variant="h5" color="inherit" sx={{ flexGrow: 1 , mb: -10}}>
-        Available Beds
-        <Divider  sx={{ mb: 10 }} />
-
-      </Typography>
-     
-    </Box>
-    
-                    <Table >
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Ward Number</TableCell>
-                          <TableCell>Ward Name</TableCell>
-                          <TableCell>Bed Number</TableCell>
-                          <TableCell>Action</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>Row 1, Cell 1</TableCell>
-                          <TableCell>Row 1, Cell 1</TableCell>
-                          <TableCell>Row 1, Cell 2</TableCell>
-                          <TableCell>Row 1, Cell 3</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Row 2, Cell 1</TableCell>
-                          <TableCell>Row 2, Cell 2</TableCell>
-                          <TableCell>Row 2, Cell 2</TableCell>
-
-                          <TableCell>Row 2, Cell 3</TableCell>
-                        </TableRow>
-                        {/* Add more rows as needed */}
-                      </TableBody>
-                    </Table>
+            <Divider sx={{ mb: 2 }} />
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Ward Number</TableCell>
+                    <TableCell>Available Beds</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>{wardNumber}</TableCell>
+                    <TableCell>{availableBeds !== null ? availableBeds : 'Loading...'}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Paper>
         </Grid>
       </Grid>

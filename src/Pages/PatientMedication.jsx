@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Paper,
   Button,
@@ -13,33 +13,135 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  TableHead
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
+import supabase from '../Services/Supabase';
 
-export default function PatientMedication() {
+const verticalLine = {
+  border: '1px solid rgba(224, 224, 224, 1)'
+};
+
+const PatientMedication = () => {
   const navigate = useNavigate();
-  const [openDialog, setOpenDialog] = useState(false); // State for dialog visibility
+  const [patientMed, setPatientMed] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [newPatientMed, setNewPatientMed] = useState({
+    patientnumber: '',
+    drugnumber: '',
+    unitsperday: '',
+    startdate: '',
+    finishdate: ''
+  });
+  const [isEdit, setIsEdit] = useState(false);
+  const [editId, setEditId] = useState(null);
+
+  useEffect(() => {
+    fetchPatientMed();
+  }, []);
+
+  async function fetchPatientMed() {
+    try {
+      const { data, error } = await supabase.from('patient_medication').select('*');
+      if (error) {
+        console.error('Error fetching patient medication:', error.message);
+        return;
+      }
+      setPatientMed(data);
+      console.log(data);
+    } catch (error) {
+      console.error('Error fetching patient medication', error.message);
+    }
+  }
+
+  const filteredPatientMed = patientMed.filter((patientMeds) =>
+    (typeof patientMeds.patientnumber === 'string' && patientMeds.patientnumber.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (typeof patientMeds.drugnumber === 'string' && patientMeds.drugnumber.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (typeof patientMeds.drugname === 'string' && patientMeds.drugname.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (typeof patientMeds.startdate === 'string' && patientMeds.startdate.toString().includes(searchQuery)) ||
+    (typeof patientMeds.finishdate === 'string' && patientMeds.finishdate.toString().includes(searchQuery)) ||
+    (typeof patientMeds.unitsperday === 'string' && patientMeds.unitsperday.toString().includes(searchQuery))
+  );
 
   const handleSearch = (event) => {
-    // Implement search functionality here
-    const searchQuery = event.target.value;
-    console.log('Searching for:', searchQuery);
-    // You can perform further actions based on the searchQuery
+    setSearchQuery(event.target.value);
   };
 
   const handleEditClick = () => {
-    setOpenDialog(true); // Open dialog for adding new data
+    setIsEdit(false);
+    setNewPatientMed({
+      patientnumber: '',
+      drugnumber: '',
+      unitsperday: '',
+      startdate: '',
+      finishdate: ''
+    });
+    setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
-    setOpenDialog(false); // Close dialog
+    setOpenDialog(false);
   };
 
-  const handleSave = () => {
-    // Implement save functionality for the dialog form
-    console.log('Saving new data...');
-    handleCloseDialog(); // Close dialog after saving
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setNewPatientMed({ ...newPatientMed, [name]: value });
+  };
+
+  const handleSave = async () => {
+    if (isEdit) {
+      try {
+        const { error } = await supabase
+          .from('patient_medication')
+          .update(newPatientMed)
+          .eq('id', editId);
+
+        if (error) {
+          console.error('Error updating patient medication:', error.message);
+          return;
+        }
+
+        await fetchPatientMed();
+        handleCloseDialog();
+      } catch (error) {
+        console.error('Error updating patient medication', error.message);
+      }
+    } else {
+      try {
+        const { error } = await supabase.from('patient_medication').insert([newPatientMed]);
+
+        if (error) {
+          console.error('Error saving new patient medication:', error.message);
+          return;
+        }
+
+        await fetchPatientMed();
+        handleCloseDialog();
+      } catch (error) {
+        console.error('Error saving new patient medication', error.message);
+      }
+    }
+  };
+
+  const handleUpdateClick = (patientMedi) => {
+    setIsEdit(true);
+    setEditId(patientMedi.id);
+    setNewPatientMed({
+      id: patientMedi.id,
+      patientnumber: patientMedi.patientnumber,
+      drugnumber: patientMedi.drugnumber,
+      unitsperday: patientMedi.unitsperday,
+      startdate: patientMedi.startdate,
+      finishdate: patientMedi.finishdate
+    });
+    setOpenDialog(true);
   };
 
   return (
@@ -58,7 +160,7 @@ export default function PatientMedication() {
           }}
           onClick={handleEditClick}
         >
-          Edit
+          Add
         </Button>
       </Box>
       <Grid item xs={12}>
@@ -76,7 +178,7 @@ export default function PatientMedication() {
             <TextField
               variant="outlined"
               placeholder="Search"
-              sx={{ borderRadius: 1, ml: 'auto' }} // Move to the right
+              sx={{ borderRadius: 1, ml: 'auto' }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -85,34 +187,120 @@ export default function PatientMedication() {
                 ),
                 sx: {
                   ml: 2,
-                  borderRadius: 2, // Adding borderRadius
+                  borderRadius: 2,
                 },
               }}
               onChange={handleSearch}
             />
           </Box>
-          <Divider sx={{ mb: 50 }} />
-          {/* Other content related to staff assignment */}
+          <Divider sx={{ mb: 2 }} />
+          <TableContainer component={Paper}>
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={verticalLine}>Patient number</TableCell>
+                  <TableCell sx={verticalLine}>Drug number</TableCell>
+                  <TableCell sx={verticalLine}>Drug name</TableCell>
+                  <TableCell sx={verticalLine}>Start date</TableCell>
+                  <TableCell sx={verticalLine}>Finish date</TableCell>
+                  <TableCell sx={verticalLine}>Units per day</TableCell>
+                  <TableCell sx={verticalLine}>
+                    <Typography sx={{ textAlign: 'center', fontSize: '14px' }}>Action</Typography>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredPatientMed.map((patientMedi) => (
+                  <TableRow key={patientMedi.id}>
+                    <TableCell sx={verticalLine}>{patientMedi.patientnumber}</TableCell>
+                    <TableCell sx={verticalLine}>{patientMedi.drugnumber}</TableCell>
+                    <TableCell sx={verticalLine}>{patientMedi.drugname}</TableCell>
+                    <TableCell sx={verticalLine}>{patientMedi.startdate}</TableCell>
+                    <TableCell sx={verticalLine}>{patientMedi.finishdate}</TableCell>
+                    <TableCell sx={verticalLine}>{patientMedi.unitsperday}</TableCell>
+                    <TableCell sx={verticalLine}>
+                      <Typography sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Button onClick={() => handleUpdateClick(patientMedi)}>
+                          Update
+                        </Button>
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Paper>
       </Grid>
-
-      {/* Dialog for Add functionality */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-        <DialogTitle>Add Patient Medication</DialogTitle>
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>{isEdit ? 'Edit Patient Medication' : 'Add New Patient Medication'}</DialogTitle>
         <DialogContent>
-          {/* Add form fields or content for adding new data */}
-          <TextField fullWidth variant="outlined" label="Medication Name" sx={{ mb: 2 }} />
-          <TextField fullWidth variant="outlined" label="Dosage" sx={{ mb: 2 }} />
-          <TextField fullWidth variant="outlined" label="Frequency" sx={{ mb: 2 }} />
-          {/* Add more fields as needed */}
+          <TextField
+            name="patientnumber"
+            label="Patient Number"
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            value={newPatientMed.patientnumber}
+            onChange={handleInputChange}
+          />
+          <TextField
+            name="drugnumber"
+            label="Drug Number"
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            value={newPatientMed.drugnumber}
+            onChange={handleInputChange}
+          />
+          <TextField
+            name="unitsperday"
+            label="Units Per Day"
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            value={newPatientMed.unitsperday}
+            onChange={handleInputChange}
+          />
+          <TextField
+            name="startdate"
+            label="Start Date"
+            type="date"
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            value={newPatientMed.startdate}
+            onChange={handleInputChange}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+          <TextField
+            name="finishdate"
+            label="Finish Date"
+            type="date"
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            value={newPatientMed.finishdate}
+            onChange={handleInputChange}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained" sx={{ backgroundColor: 'green', color: 'white' }}>
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSave} color="primary">
             Save
           </Button>
         </DialogActions>
       </Dialog>
     </Container>
   );
-}
+};
+
+export default PatientMedication;
+
