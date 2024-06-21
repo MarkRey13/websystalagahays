@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import {
   AppBar as MuiAppBar, Box, Container, CssBaseline, Divider,
   Drawer as MuiDrawer, Grid, IconButton, List, styled, ThemeProvider,
-  Toolbar, createTheme} from '@mui/material';
+  Toolbar, Typography, createTheme
+} from '@mui/material';
 import { AccountCircle, ChevronLeft as ChevronLeftIcon,
    Menu as MenuIcon, Brightness4, Brightness7 } from '@mui/icons-material';
 import { Outlet } from 'react-router-dom';
@@ -31,7 +32,6 @@ const AppBar = styled(MuiAppBar, {
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
-    
     '& .MuiDrawer-paper': {
       position: 'relative',
       whiteSpace: 'nowrap',
@@ -102,10 +102,11 @@ export default function Dashboard() {
             >
               <MenuIcon />
             </IconButton>
-              {/* <Typography component="h1" variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-                  Dashboard
-              </Typography> */}
-            <IconButton color="inherit" onClick={toggleDarkMode }   >
+            <Typography component="h1" variant="h6" color="inherit" noWrap>
+              Dashboard
+            </Typography>
+            <Box sx={{ flexGrow: 1 }} />
+            <IconButton color="inherit" onClick={toggleDarkMode}>
               {darkMode ? <Brightness7 /> : <Brightness4 />}
             </IconButton>
             <IconButton color="inherit">
@@ -129,9 +130,9 @@ export default function Dashboard() {
           </Toolbar>
 
           <Divider />
-          
+
           <List component="nav" sx={{ flexGrow: 1 }}>
-            <MainListItems /> {/*  basta mao ning sa Navlist*/}
+            <MainListItems /> {/* This references the NavList component */}
             <Divider sx={{ my: 1 }} />
           </List>
         </Drawer>
@@ -148,7 +149,7 @@ export default function Dashboard() {
             overflow: 'auto',
           }}
         >
-          <Toolbar />  
+          <Toolbar />
           <Container maxWidth="false" sx={{ mt: 4, mb: 4 }}>
             <Grid container>
               <Grid item xs={12}>

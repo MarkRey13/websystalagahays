@@ -25,50 +25,48 @@ export default function Wards() {
   };
 
   return (
-    <Container display="flex" justifyContent="center" alignItems="center" mt={5} mb={5}>
-      <Grid container spacing={3}>
-        <Grid item xs={12} sm={6}>
-          <Paper sx={{ p: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <FormControl variant="outlined" sx={{ minWidth: 200, mr: 2 }}>
-                <InputLabel>Ward Number</InputLabel>
-                <Select
-                  value={wardNumber}
-                  onChange={handleWardChange}
-                  label="Ward Number"
-                >
-                  <MenuItem value="">
-                    <em>None</em>
+    <Container maxWidth="lg" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '65vh' }}>
+      <Box display="flex" justifyContent="center" alignItems="center" width="100%">
+        <Paper sx={{ p: 2, width: '100%', maxWidth: 600 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <FormControl variant="outlined" sx={{ minWidth: 200, mr: 2 }}>
+              <InputLabel>Ward Number</InputLabel>
+              <Select
+                value={wardNumber}
+                onChange={handleWardChange}
+                label="Ward Number"
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                {/* Replace hardcoded values with data from the WARD table */}
+                {[...Array(18).keys()].map((wardNumber) => (
+                  <MenuItem key={wardNumber + 1} value={wardNumber + 1}>
+                    {wardNumber + 1}
                   </MenuItem>
-                  {/* Replace hardcoded values with data from the WARD table */}
-                  {[...Array(18).keys()].map((wardNumber) => (
-                    <MenuItem key={wardNumber + 1} value={wardNumber + 1}>
-                      {wardNumber + 1}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-            <Divider sx={{ mb: 2 }} />
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Ward Number</TableCell>
-                    <TableCell>Available Beds</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>{wardNumber}</TableCell>
-                    <TableCell>{availableBeds !== null ? availableBeds : 'Loading...'}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </Grid>
-      </Grid>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+          <Divider sx={{ mb: 2 }} />
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Ward Number</TableCell>
+                  <TableCell>Available Beds</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>{wardNumber}</TableCell>
+                  <TableCell>{availableBeds !== null ? availableBeds : 'Loading...'}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      </Box>
     </Container>
   );
 }

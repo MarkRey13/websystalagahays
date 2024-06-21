@@ -72,6 +72,7 @@ const Main = () => {
     const handleAddStaffClick = () => {
         setIsEditMode(false);
         setFormData({
+            staffnumber: '',
             firstname: '',
             lastname: '',
             address: '',
@@ -120,7 +121,11 @@ const Main = () => {
                     .insert([formData]);
             }
 
-            console.log('Staff saved successfully:', data);
+            if (result.error) {
+                throw result.error;
+            }
+
+            console.log('Staff saved successfully:', result.data);
             fetchStaffs(); // Refresh staff list
             handleCloseDialog();
         } catch (error) {
@@ -156,40 +161,18 @@ const Main = () => {
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-            <Container maxWidth="false" sx={{ mt: -5 }}>
+            <Container maxWidth={false} sx={{ mt: -5 }}>
                 <Toolbar sx={{ display: 'flex', justifyContent: 'flex-end', pr: '24px' }}></Toolbar>
                 <Grid container spacing={5} justifyContent="flex-start" alignItems="center">
                     <Grid item xs={12}>
                         <Grid container spacing={3} justifyContent="center" alignItems="center">
                             <Grid item xs={3}>
-                                <Link to="/dashboard/registerPatient" style={{ textDecoration: 'none' }}>
-                                    <Paper
-                                        sx={{
-                                            p: 3,
-                                            backgroundColor: '#007bff',
-                                            '&:hover': { backgroundColor: '#0056b3' },
-                                            borderRadius: '5px',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                        }}
-                                        variant="contained"
-                                    >
-                                        <LocalHospitalIcon style={{ fontSize: 40, color: 'white', marginRight: 10 }} />
-                                        <Typography variant="h6" color="white">
-                                            Register Patient
-                                        </Typography>
-                                    </Paper>
-                                </Link>
-                            </Grid>
-
-                            <Grid item xs={3}>
                                 <Link to="/dashboard/Patient" style={{ textDecoration: 'none' }}>
                                     <Paper
                                         sx={{
                                             p: 3,
-                                            backgroundColor: '#388e3c',
-                                            '&:hover': { backgroundColor: '#194d33' },
+                                            backgroundColor: '#5c6bc0',
+                                            '&:hover': { backgroundColor: '#303f9f' },
                                             borderRadius: '5px',
                                             display: 'flex',
                                             justifyContent: 'center',
@@ -210,8 +193,8 @@ const Main = () => {
                                     <Paper
                                         sx={{
                                             p: 3,
-                                            backgroundColor: '#388e3c',
-                                            '&:hover': { backgroundColor: '#194d33' },
+                                            backgroundColor: '#ec407a',
+                                            '&:hover': { backgroundColor: '#ad1457' },
                                             borderRadius: '5px',
                                             display: 'flex',
                                             justifyContent: 'center',
@@ -232,8 +215,8 @@ const Main = () => {
                                     <Paper
                                         sx={{
                                             p: 3,
-                                            backgroundColor: '#d32f2f',
-                                            '&:hover': { backgroundColor: '#b71c1c' },
+                                            backgroundColor: '#00897b',
+                                            '&:hover': { backgroundColor: '#004d40' },
                                             borderRadius: '5px',
                                             display: 'flex',
                                             justifyContent: 'center',
@@ -281,7 +264,7 @@ const Main = () => {
 
                                 <TableContainer>
                                     <Table>
-                                        <TableHead sx={{ p: 30, backgroundColor: '#F5F5F5' }}>
+                                        <TableHead sx={{ p: '20px' }}>
                                             <TableRow>
                                                 <TableCell>Staff Number</TableCell>
                                                 <TableCell>First Name</TableCell>
@@ -317,21 +300,22 @@ const Main = () => {
                                                     <TableCell>{staff.paidweeklyormonthly}</TableCell>
                                                     <TableCell>{staff.permanentortemporary}</TableCell>
                                                     <TableCell>
-                                                        <Button
+                                                        <Box sx={{ display: 'flex', gap: 1 }}>
+                                                            <Button
                                                             variant="contained"
                                                             color="primary"
                                                             onClick={() => handleEditClick(staff)}
-                                                            sx={{ mr: 1 }}
-                                                        >
-                                                            Edit
-                                                        </Button>
-                                                        <Button
+                                                            >
+                                                                Edit
+                                                            </Button>
+                                                            <Button
                                                             variant="contained"
-                                                            color="secondary"
+                                                            sx={{ backgroundColor: '#ec407a', '&:hover': { backgroundColor: 'darkred' } }}
                                                             onClick={() => handleDeleteClick(staff)}
-                                                        >
-                                                            Delete
-                                                        </Button>
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                        </Box>
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
@@ -467,7 +451,7 @@ const Main = () => {
                         />
                     </DialogContent>
                     <DialogActions>
-                        <Button  onClick={handleCloseDialog} color="secondary">
+                        <Button onClick={handleCloseDialog} color="secondary">
                             Cancel
                         </Button>
                         <Button onClick={handleSave} color="primary">

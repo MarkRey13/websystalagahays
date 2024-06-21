@@ -21,10 +21,10 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
+import { createClient } from '@supabase/supabase-js';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import { createClient } from '@supabase/supabase-js';
+import BusinessIcon from '@mui/icons-material/Business';
 
 export default function StocksAndSupplies() {
   const navigate = useNavigate();
@@ -184,24 +184,39 @@ export default function StocksAndSupplies() {
     <Container maxWidth="false">
       <Grid container spacing={2} justifyContent="center" alignItems="center">
         <Grid item>
-          <Button variant="contained" onClick={() => handleCategoryClick('Surgical and Non-Surgical')}>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<MedicalServicesIcon />}
+            onClick={() => handleCategoryClick('Surgical and Non-Surgical')}
+          >
             Surgical and Non-Surgical
           </Button>
         </Grid>
         <Grid item>
-          <Button variant="contained" onClick={() => handleCategoryClick('Pharmaceutical')}>
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<LocalPharmacyIcon />}
+            onClick={() => handleCategoryClick('Pharmaceutical')}
+          >
             Pharmaceutical
           </Button>
         </Grid>
         <Grid item>
-          <Button variant="contained" onClick={() => handleCategoryClick('Suppliers')}>
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<BusinessIcon />}
+            onClick={() => handleCategoryClick('Suppliers')}
+          >
             Suppliers
           </Button>
         </Grid>
       </Grid>
 
       <Grid item xs={12}>
-        <Paper elevation={2}>
+        <Paper elevation={2} sx={{ padding: 2, marginTop: 2 }}>
           <Box style={{ marginBottom: '16px', width: '100%', display: 'flex', alignItems: 'center' }}>
             <Typography sx={{ m: 0, mr: 'auto', fontSize: '20px' }}>Available Stocks and Supplies</Typography>
             <TextField
